@@ -7,6 +7,7 @@ import com.recetapp.recetas_pi.dto.receta.RecetaUpdateRequest;
 import com.recetapp.recetas_pi.model.Categoria;
 import com.recetapp.recetas_pi.model.IngredienteReceta;
 import com.recetapp.recetas_pi.model.Receta;
+import com.recetapp.recetas_pi.service.CategoriaService;
 import com.recetapp.recetas_pi.service.RecetaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,6 +44,9 @@ public class RecetaController {
 
     @Autowired
     private RecetaService recetaService;
+
+    @Autowired
+    private CategoriaService categoriaService;
 
     /**
      * Obtener todas las recetas o filtrar por título.
@@ -236,6 +240,23 @@ public class RecetaController {
     public ResponseEntity<List<RecetaResponse>> searchByTag(@RequestParam String tag) {
         List<Receta> recetas = recetaService.buscarPorTag(tag);
         return ResponseEntity.ok(toResponseList(recetas));
+    }
+
+    /**
+     * Obtener todos los tags disponibles (categorias de la DB).
+     * GET /api/recetas/tags
+     */
+    @Operation(
+            summary = "Listar tags",
+            description = "Devuelve todos los tags disponibles en DB (tabla categorias). React Native: fetch('/api/recetas/tags')."
+    )
+    @ApiResponse(responseCode = "200", description = "Listado de tags")
+    @GetMapping({"/tags"})
+    public ResponseEntity<List<String>> getTags() {
+        List<String> tags = categoriaService.getAllCategorias().stream()
+                .map(Categoria::getNombre)
+                .toList();
+        return ResponseEntity.ok(tags);
     }
 
     /**

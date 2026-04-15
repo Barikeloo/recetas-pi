@@ -923,6 +923,311 @@ const result = await res.json();
 
 ---
 
+## Endpoints de Listas
+
+> 🔐 **Autenticación en Listas**
+>
+> Todos los endpoints de listas requieren JWT (`Authorization: Bearer <token>`).
+> Cada usuario solo puede operar sobre sus propias listas.
+
+### Listar mis listas
+- **GET** `/api/listas/mine`
+- **Body:** sin body
+- **Respuesta:**
+```json
+[
+  {
+    "id": 2,
+    "nombre": "Cenas saludables",
+    "imagenUrl": "https://example.com/lista-cenas.jpg",
+    "fechaCreacion": "2026-04-09T18:12:00",
+    "totalRecetas": 3
+  }
+]
+```
+
+#### Ejemplo React / React Native
+```js
+const res = await fetch('http://localhost:8080/api/listas/mine', {
+  headers: { Authorization: `Bearer ${token}` }
+});
+const listas = await res.json();
+```
+
+---
+
+### Obtener detalle de una lista
+- **GET** `/api/listas/{listaId}`
+- **Body:** sin body
+- **Respuesta:**
+```json
+{
+  "id": 2,
+  "nombre": "Cenas saludables",
+  "imagenUrl": "https://example.com/lista-cenas.jpg",
+  "fechaCreacion": "2026-04-09T18:12:00",
+  "totalRecetas": 3
+}
+```
+
+#### Ejemplo React / React Native
+```js
+const res = await fetch(`http://localhost:8080/api/listas/${listaId}`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
+const lista = await res.json();
+```
+
+---
+
+### Crear lista
+- **POST** `/api/listas`
+- **Body:**
+```json
+{
+  "nombre": "Meal prep",
+  "imagenUrl": "https://example.com/mealprep.jpg"
+}
+```
+- **Respuesta:** lista creada (`201`)
+
+#### Ejemplo React / React Native
+```js
+const payload = {
+  nombre: 'Meal prep',
+  imagenUrl: 'https://example.com/mealprep.jpg'
+};
+
+const res = await fetch('http://localhost:8080/api/listas', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify(payload)
+});
+const creada = await res.json();
+```
+
+---
+
+### Actualizar lista
+- **PUT** `/api/listas/{listaId}`
+- **Body:**
+```json
+{
+  "nombre": "Meal prep semanal",
+  "imagenUrl": "https://example.com/mealprep-new.jpg"
+}
+```
+- **Respuesta:** lista actualizada
+
+#### Ejemplo React / React Native
+```js
+const payload = {
+  nombre: 'Meal prep semanal',
+  imagenUrl: 'https://example.com/mealprep-new.jpg'
+};
+
+const res = await fetch(`http://localhost:8080/api/listas/${listaId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify(payload)
+});
+const actualizada = await res.json();
+```
+
+---
+
+### Eliminar lista
+- **DELETE** `/api/listas/{listaId}`
+- **Body:** sin body
+- **Respuesta exitosa:**
+```text
+Lista eliminada correctamente
+```
+
+#### Ejemplo React / React Native
+```js
+await fetch(`http://localhost:8080/api/listas/${listaId}`, {
+  method: 'DELETE',
+  headers: { Authorization: `Bearer ${token}` }
+});
+```
+
+---
+
+## Endpoints de Lista-Recetas
+
+### Listar recetas de una lista
+- **GET** `/api/listas/{listaId}/recetas`
+- **Body:** sin body
+- **Respuesta:**
+```json
+[
+  {
+    "recetaId": 7,
+    "titulo": "Tortilla de avena",
+    "imagenUrl": "https://example.com/tortilla.jpg",
+    "fechaAgregado": "2026-04-09T18:20:12"
+  }
+]
+```
+
+#### Ejemplo React / React Native
+```js
+const res = await fetch(`http://localhost:8080/api/listas/${listaId}/recetas`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
+const recetasEnLista = await res.json();
+```
+
+---
+
+### Añadir receta a una lista
+- **POST** `/api/listas/{listaId}/recetas/{recetaId}`
+- **Body:** sin body
+- **Respuesta:** `ListaRecetaResponse` (`201`)
+
+#### Ejemplo React / React Native
+```js
+const res = await fetch(`http://localhost:8080/api/listas/${listaId}/recetas/${recetaId}`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${token}` }
+});
+const agregada = await res.json();
+```
+
+---
+
+### Eliminar receta de una lista
+- **DELETE** `/api/listas/{listaId}/recetas/{recetaId}`
+- **Body:** sin body
+- **Respuesta exitosa:**
+```text
+Receta eliminada de la lista
+```
+
+#### Ejemplo React / React Native
+```js
+await fetch(`http://localhost:8080/api/listas/${listaId}/recetas/${recetaId}`, {
+  method: 'DELETE',
+  headers: { Authorization: `Bearer ${token}` }
+});
+```
+
+---
+
+## Recuperación y cambio de contraseña
+
+### 1) Cambio de contraseña con sesión iniciada
+- **PATCH** `/api/usuarios/me/password`
+- **Headers:** `Authorization: Bearer <token>`
+- **Body:**
+```json
+{
+  "passwordActual": "123456",
+  "passwordNueva": "nuevaPassword123"
+}
+```
+- **Cuándo usarlo:** usuario logeado que conoce su contraseña actual.
+
+#### Ejemplo React / React Native
+```js
+await fetch('http://localhost:8080/api/usuarios/me/password', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    passwordActual: '123456',
+    passwordNueva: 'nuevaPassword123'
+  })
+});
+```
+
+---
+
+### 2) Solicitar recuperación (usuario olvidó contraseña)
+- **POST** `/api/auth/password/forgot`
+- **Body:**
+```json
+{
+  "correo": "usuario@mail.com"
+}
+```
+- **Qué hace:** genera token temporal y envía email con deep link, por ejemplo:
+  `recetapp://reset-password?token=<token>`
+
+#### Ejemplo React / React Native
+```js
+await fetch('http://localhost:8080/api/auth/password/forgot', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ correo: 'usuario@mail.com' })
+});
+```
+
+---
+
+### 3) Validar token del enlace recibido
+- **GET** `/api/auth/password/validate/{token}`
+- **Body:** sin body
+- **Respuesta:**
+```json
+{
+  "valido": true,
+  "mensaje": "Token valido"
+}
+```
+
+#### Ejemplo React / React Native
+```js
+const res = await fetch(`http://localhost:8080/api/auth/password/validate/${token}`);
+const validacion = await res.json();
+```
+
+---
+
+### 4) Restablecer contraseña con token
+- **POST** `/api/auth/password/reset`
+- **Body:**
+```json
+{
+  "token": "TOKEN_RECIBIDO_EN_EL_MAIL",
+  "nuevaPassword": "MiNuevaPassword2026"
+}
+```
+- **Qué hace:** cambia contraseña y marca el token como usado.
+
+#### Ejemplo React / React Native
+```js
+await fetch('http://localhost:8080/api/auth/password/reset', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    token,
+    nuevaPassword: 'MiNuevaPassword2026'
+  })
+});
+```
+
+---
+
+## Flujo recomendado en React Native (deep link)
+
+1. Pantalla "Olvidé mi contraseña": llama a `POST /api/auth/password/forgot`.
+2. Usuario abre el enlace recibido en el email.
+3. Tu app abre la pantalla `reset-password` con `token` en params (`recetapp://reset-password?token=...`).
+4. Opcional: valida token con `GET /api/auth/password/validate/{token}`.
+5. Envía `POST /api/auth/password/reset` con la nueva contraseña.
+
+---
+
 ## Notas
 - Todos los endpoints devuelven errores en formato `{ "error": "mensaje" }` o texto plano.
 - Para pruebas, puedes usar herramientas como Postman o Insomnia.
