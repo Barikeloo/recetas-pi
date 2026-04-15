@@ -314,6 +314,20 @@ const misAlergias = await res.json();
 
 ---
 
+### Obtener alergia por ID
+
+- **GET** `/api/alergias/{id}`
+- **Body:** sin body
+- **Respuesta:** alergia encontrada o `404` si no existe
+
+#### Ejemplo React Native
+```js
+const res = await fetch(`http://localhost:8080/api/alergias/${id}`);
+const alergia = await res.json();
+```
+
+---
+
 ### Listar todas las alergias
 
 - **GET** `/api/alergias`
@@ -363,6 +377,30 @@ await fetch('http://localhost:8080/api/alergias', {
   },
   body: JSON.stringify({ nombre: 'Frutos secos' })
 });
+```
+
+---
+
+### Actualizar una alergia
+
+- **PUT** `/api/alergias/{id}`
+- **Body:**
+```json
+{ "nombre": "Nuevo nombre" }
+```
+- **Respuesta:** alergia actualizada o `404` si no existe
+
+#### Ejemplo React Native
+```js
+const res = await fetch(`http://localhost:8080/api/alergias/${id}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({ nombre: 'Nuevo nombre' })
+});
+const alergiaActualizada = await res.json();
 ```
 
 ---
@@ -519,6 +557,19 @@ const recetas = await res.json();
 ```js
 const res = await fetch('http://localhost:8080/api/recetas/searchByTag?tag=vegano');
 const recetas = await res.json();
+```
+
+---
+
+### Listar tags disponibles (categorias)
+- **GET** `/api/recetas/tags`
+- **Body:** sin body
+- **Respuesta:** array de strings (nombres de categorias)
+
+#### Ejemplo React Native
+```js
+const res = await fetch('http://localhost:8080/api/recetas/tags');
+const tags = await res.json();
 ```
 
 ---
